@@ -6,6 +6,7 @@ import com.alibaba.fastjson.serializer.ValueFilter;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.nio.charset.Charset;
+import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -24,6 +25,21 @@ public class StringUtil {
     public static void main(String[] args) {
         System.out.println(getColor(MD5_POST_KEY));
     }
+
+
+    // 生成6位随机验证码
+    public static String random6() {
+        StringBuilder stringBuilder = new StringBuilder();
+        // 使用 Random随机生成数
+        Random random = new Random();
+        while (stringBuilder.length() < 6){
+            // 定义6位长度，每次随机生成一位数字，存在stringBuilder中
+            stringBuilder.append(random.nextInt(10));
+        }
+        return stringBuilder.toString();
+    }
+
+
 
     /**
      * 获取16进制颜色值

@@ -93,7 +93,7 @@ public class UserTransfer {
                 .email(request.getEmail())
                 .state(UserStateEn.UN_ACTIVATION)
                 .source(UserSourceEn.REGISTER)
-                .nickname(request.getNickname())
+                .nickname(request.getEmail())
                 .password(StringUtil.md5UserPassword(request.getPassword()))
                 .signature("")
                 .role(UserRoleEn.USER)

@@ -49,6 +49,17 @@ public class UserRestController {
         return resultModel;
     }
 
+    @PostMapping("/emailCode")
+    public ResultModel<String> sendEmailCode(@RequestBody UserSendEmailCodeRequest request, HttpServletRequest servletRequest, HttpServletResponse response) {
+        //request.setIp(WebUtil.requestIp(servletRequest));
+        //request.setUa(WebUtil.requestUa(servletRequest));
+        ResultModel<String> resultModel =  userApiService.sendEmailCode(request);
+
+       // WebUtil.cookieAddSid(response, resultModel.getData());
+
+        return resultModel;
+    }
+
     @PostMapping("/login")
     public ResultModel<String> login(@RequestBody UserEmailLoginRequest request, HttpServletRequest servletRequest, HttpServletResponse response) {
         request.setIp(WebUtil.requestIp(servletRequest));

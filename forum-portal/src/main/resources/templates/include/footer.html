@@ -6,12 +6,12 @@
         <ul class="foot-link">
             <!--<li><a class="text-reset" href="javascript:;">在线人数：<span th:text="${onlineUsers}"></span></a></li>-->
             <!--<li><a class="text-reset" href="https://www.developers.pub/blog" target="_blank">博客文章</a></li>-->
-            <li><span th:text="${globalConfig.websiteRecord}">皖ICP备17014120号</span>
+           <!-- <li><span th:text="${globalConfig.websiteRecord}">皖ICP备17014120号</span>
                 <a class="text-reset"
                    href="https://www.developers.pub"
                    th:text="'© 2016-' + ${#dates.format(#dates.createNow(), 'yyyy')} + ' 杭州余杭顽强网络技术工作室'"
                    target="_blank"> © 2016-2021 杭州余杭顽强网络技术工作室</a>
-            </li>
+            </li>-->
         </ul>
     </div>
 
@@ -50,6 +50,8 @@
             });
         });
 
+
+
         // 注册
         $('#registerBtn').on('click', function () {
             var email = $('#registerEmail').val();
@@ -62,7 +64,7 @@
                 return;
             }
 
-            var nickname = $('#registerNickname').val();
+           /* var nickname = $('#registerNickname').val();
             if (!nickname) {
                 toastr.error('昵称不能为空');
                 return;
@@ -70,13 +72,20 @@
             if (nickname.length > 10) {
                 toastr.error('昵称不能超过10个字符');
                 return;
-            }
+            }*/
 
             var password = $('#registerPassword').val();
             if (!password) {
                 toastr.error('注册密码不能为空');
                 return;
             }
+
+            var code = $('#registerCode').val();
+            if (!code) {
+                toastr.error('验证码不能为空');
+                return;
+            }
+
 
             var password2 = $('#registerPassword2').val();
             if (!password2) {
@@ -91,13 +100,32 @@
 
             post('/user-rest/register', {
                 'email': email,
-                'nickname': nickname,
+                'code': code,
+                //'nickname': nickname,
                 'password': md5(password)
             }, function (data) {
                 localStorage.setItem('token', data);
                 location.reload();
             });
         });
+
+        // send email code
+        $('#codeBtn').on('click', function () {
+            var email = $('#registerEmail').val();
+            if (!email) {
+                toastr.error('注册邮箱不能为空');
+                return false;
+            }
+
+            post('/user-rest/emailCode', {
+                'email': email
+
+            }, function (data) {
+                localStorage.setItem('token', data);
+                //location.reload();
+            });
+        });
+
 
         // 保存文章
         $('#updateArticleBtn').on('click', function () {

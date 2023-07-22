@@ -1,6 +1,8 @@
 package pub.developers.forum.app.manager;
 
 import com.alibaba.fastjson.JSON;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -14,24 +16,26 @@ import pub.developers.forum.api.response.user.UserPageResponse;
 import pub.developers.forum.app.support.IsLogin;
 import pub.developers.forum.app.support.Pair;
 import pub.developers.forum.app.transfer.OptLogTransfer;
-import pub.developers.forum.common.enums.UserStateEn;
+import pub.developers.forum.common.enums.*;
 import pub.developers.forum.common.support.*;
 import pub.developers.forum.domain.entity.Follow;
+import pub.developers.forum.domain.entity.Message;
+import pub.developers.forum.domain.entity.value.IdValue;
 import pub.developers.forum.domain.repository.OptLogRepository;
 import pub.developers.forum.app.support.LoginUserContext;
 import pub.developers.forum.app.transfer.UserTransfer;
 import pub.developers.forum.app.support.PageUtil;
-import pub.developers.forum.common.enums.CacheBizTypeEn;
-import pub.developers.forum.common.enums.ErrorCodeEn;
-import pub.developers.forum.common.enums.UserRoleEn;
 import pub.developers.forum.common.model.PageResult;
 import pub.developers.forum.domain.entity.OptLog;
 import pub.developers.forum.domain.entity.User;
+import pub.developers.forum.domain.service.MailService;
+import pub.developers.forum.domain.service.MessageService;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -45,6 +49,10 @@ public class UserManager extends AbstractLoginManager {
     @Resource
     private OptLogRepository optLogRepository;
 
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private MailService mailService;
     /**
      * 邮箱 + 密码 登录
      * @param request
@@ -64,6 +72,42 @@ public class UserManager extends AbstractLoginManager {
         userRepository.update(user);
 
         return login(user, request);
+    }
+
+    /**
+     * 用户注册
+     * @param request
+     */
+    @Transactional
+    public String register(UserRegisterRequest request) {
+        // 判断邮箱是否已经被注册
+        User user = userRepository.getByEmail(request.getEmail());
+        CheckUtil.isNotEmpty(user, ErrorCodeEn.USER_REGISTER_EMAIL_IS_EXIST);
+        //String ss = stringRedisTemplate.opsForValue().get(request.getEmail());
+
+        CheckUtil.isFalse(stringRedisTemplate.opsForValue().get(request.getEmail()).equals(request.getCode()), ErrorCodeEn.USER_REGISTER_CODE_IS_INVALID);
+
+        User registerUser = UserTransfer.toUser(request);
+
+        // 保存注册用户
+        userRepository.save(registerUser);
+
+        // 触发保存操作日志事件
+        EventBus.emit(EventBus.Topic.USER_REGISTER, registerUser);
+
+        return login(registerUser, request);
+    }
+    public void sendEmailCodeRequest(UserSendEmailCodeRequest request) {
+
+        Message message = new Message();
+        IdValue idValue =  new IdValue(request.getEmail(), IdValueTypeEn.EMAIL);
+
+        message.setReceiver(idValue);
+        message.setTitle("验证码");
+        message.setContent(StringUtil.random6());
+        stringRedisTemplate.opsForValue().set(request.getEmail(), StringUtil.random6());
+        stringRedisTemplate.expire(request.getEmail(),10, TimeUnit.MINUTES);
+        mailService.sendText(message);
     }
 
     @IsLogin(role = UserRoleEn.ADMIN)
@@ -140,26 +184,7 @@ public class UserManager extends AbstractLoginManager {
         return UserTransfer.toUserInfoResponse(user);
     }
 
-    /**
-     * 用户注册
-     * @param request
-     */
-    @Transactional
-    public String register(UserRegisterRequest request) {
-        // 判断邮箱是否已经被注册
-        User user = userRepository.getByEmail(request.getEmail());
-        CheckUtil.isNotEmpty(user, ErrorCodeEn.USER_REGISTER_EMAIL_IS_EXIST);
 
-        User registerUser = UserTransfer.toUser(request);
-
-        // 保存注册用户
-        userRepository.save(registerUser);
-
-        // 触发保存操作日志事件
-        EventBus.emit(EventBus.Topic.USER_REGISTER, registerUser);
-
-        return login(registerUser, request);
-    }
 
     /**
      * 登出

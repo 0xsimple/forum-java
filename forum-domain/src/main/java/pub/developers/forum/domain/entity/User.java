@@ -32,10 +32,7 @@ public class User extends BaseEntity {
      */
     private UserStateEn state;
 
-    /**
-     * 用户名
-     */
-    private String nickname;
+
 
     /**
      * 性别
@@ -57,6 +54,13 @@ public class User extends BaseEntity {
      */
     private String email;
 
+
+    /**
+     * 用户名
+     */
+    private String nickname = email;
+
+
     /**
      * 密码
      */
@@ -76,6 +80,8 @@ public class User extends BaseEntity {
      * 最后登录时间
      */
     private Date lastLoginTime;
+
+
 
     public String getAvatar() {
         return AvatarUtil.get(avatar, email);

@@ -107,6 +107,12 @@ public class UserApiServiceImpl implements UserApiService {
     }
 
     @Override
+    public ResultModel sendEmailCode(UserSendEmailCodeRequest request) {
+        userManager.sendEmailCodeRequest(request);
+         return ResultModelUtil.success();
+    }
+
+    @Override
     public ResultModel logout(UserTokenLogoutRequest request) {
         UserValidator.logout(request);
 

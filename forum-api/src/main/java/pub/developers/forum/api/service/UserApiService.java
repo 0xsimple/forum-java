@@ -38,6 +38,9 @@ public interface UserApiService {
 
     ResultModel<String> emailLogin(UserEmailLoginRequest request);
 
+
+    ResultModel sendEmailCode(UserSendEmailCodeRequest request);
+
     ResultModel logout(UserTokenLogoutRequest request);
 
     ResultModel updateInfo(UserUpdateInfoRequest request);

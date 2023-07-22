@@ -14,7 +14,7 @@ public class UserValidator {
     public static void register(UserRegisterRequest request) {
         CheckUtil.checkParamToast(request, "request");
         CheckUtil.checkParamToast(request.getEmail(), "email");
-        CheckUtil.checkParamToast(request.getNickname(), "nickname");
+        //CheckUtil.checkParamToast(request.getNickname(), "nickname");
         CheckUtil.checkParamToast(request.getPassword(), "password");
     }
 
